@@ -70,6 +70,57 @@ public class Database {
         }
     }
 
+    public static java.util.ArrayList<Student> loadAllStudents() {
+
+        java.util.ArrayList<Student> students = new java.util.ArrayList<>();
+
+        String studentSql = "SELECT * FROM students";
+
+        try (Connection conn = connect();
+             java.sql.Statement stmt = conn.createStatement();
+             java.sql.ResultSet rs = stmt.executeQuery(studentSql)) {
+
+            while (rs.next()) {
+
+                String id = rs.getString("student_id");
+                String firstName = rs.getString("first_name");
+                String lastName = rs.getString("last_name");
+
+                Student student = new Student(id, firstName, lastName);
+
+                // now load this student's marks
+                loadMarksForStudent(conn, student);
+
+                students.add(student);
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Failed to load students.");
+            e.printStackTrace();
+        }
+
+        return students;
+    }
+
+    private static void loadMarksForStudent(Connection conn, Student student) throws SQLException {
+
+        String markSql = "SELECT * FROM marks WHERE student_id = ?";
+
+        try (java.sql.PreparedStatement stmt = conn.prepareStatement(markSql)) {
+
+            stmt.setString(1, student.getStudentID());
+
+            try (java.sql.ResultSet rs = stmt.executeQuery()) {
+
+                while (rs.next()) {
+                    String courseName = rs.getString("course_name");
+                    int mark = rs.getInt("mark");
+                    student.addCourse(new Course(courseName, mark));
+                }
+            }
+        }
+    }
+
     public static void importFromFile() {
 
         try {
