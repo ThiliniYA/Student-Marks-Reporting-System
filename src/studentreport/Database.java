@@ -13,6 +13,35 @@ public class Database {
         return DriverManager.getConnection(URL);
     }
 
+    public static void createTables() {
+
+        String createStudents = 
+            "CREATE TABLE IF NOT EXISTS students (" +
+            "student_id VARCHAR(10) PRIMARY KEY, " +
+            "first_name VARCHAR(50), " +
+            "last_name VARCHAR(50))";
+
+        String createMarks = 
+            "CREATE TABLE IF NOT EXISTS marks (" +
+            "id INT AUTO_INCREMENT PRIMARY KEY, " +
+            "student_id VARCHAR(10), " +
+            "course_name VARCHAR(50), " +
+            "mark INT)";
+
+        try (Connection conn = connect();
+             java.sql.Statement stmt = conn.createStatement()) {
+
+            stmt.execute(createStudents);
+            stmt.execute(createMarks);
+
+            System.out.println("Tables created successfully!");
+
+        } catch (SQLException e) {
+            System.out.println("Failed to create tables.");
+            e.printStackTrace();
+        }
+    }
+
     // Just for testing - not part of the real program yet
     public static void main(String[] args) {
 
@@ -25,5 +54,7 @@ public class Database {
             System.out.println("Connection failed.");
             e.printStackTrace();
         }
+        
+        createTables();
     }
 }
